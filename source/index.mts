@@ -50,9 +50,13 @@ await commander.program
           defaults: nodemailer.SendMailOptions;
         };
       };
+      log(...messageParts: string[]): void;
     } = {
       configuration: (await import(url.pathToFileURL(configuration).href))
         .default,
+      log(...messageParts) {
+        console.log([new Date().toISOString(), ...messageParts].join(" \t"));
+      },
     };
 
     const sendMailTransport = nodemailer.createTransport(
@@ -65,17 +69,9 @@ await commander.program
         for (const url of application.configuration.urls) {
           try {
             const response = await got(url);
-            console.log(
-              `${new Date().toISOString()}\tSUCCESS\t${url}\t${
-                response.statusCode
-              }`
-            );
+            application.log("SUCCESS", url, String(response.statusCode));
           } catch (error: any) {
-            console.log(
-              `${new Date().toISOString()}\tERROR\t${url}\t${String(error)}\t${
-                error?.stack
-              }`
-            );
+            application.log("ERROR", url, String(error), error?.stack);
             try {
               await sendMailTransport.sendMail({
                 subject: `‘${url}’ IS DOWN`,
@@ -89,10 +85,11 @@ await commander.program
                 `,
               });
             } catch (error: any) {
-              console.log(
-                `${new Date().toISOString()}\tCATASTROPHIC ERROR TRYING TO SEND ALERT\t${url}\t${String(
-                  error
-                )}\t${error?.stack}`
+              application.log(
+                "CATASTROPHIC ERROR TRYING TO SEND ALERT",
+                url,
+                String(error),
+                error?.stack
               );
             }
           }
