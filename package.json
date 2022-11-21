@@ -33,10 +33,10 @@
     "nodemailer": "^6.8.0"
   },
   "devDependencies": {
-    "@types/node": "^18.11.0",
+    "@types/node": "^18.11.9",
     "caxa": "^3.0.1",
     "cross-env": "^7.0.3",
     "prettier": "^2.7.1",
-    "typescript": "^4.8.4"
+    "typescript": "^4.9.3"
   }
 }
