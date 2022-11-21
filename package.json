@@ -25,7 +25,7 @@
   "bin": "./build/index.mjs",
   "scripts": {
     "prepare": "tsc",
-    "start": "npm run prepare && node ./build/index.mjs ./configuration/development.mjs",
+    "start": "nodemon --watch \"./source/**/*.mts\" --watch \"./configuration/**/*.mjs\" --ext \"*\" --exec \"npm run prepare && node ./build/index.mjs ./configuration/development.mjs\"",
     "test": "prettier --check \"source/**/*.mts\" --end-of-line auto"
   },
   "dependencies": {
@@ -39,6 +39,7 @@
     "@types/node": "^18.11.9",
     "caxa": "^3.0.1",
     "cross-env": "^7.0.3",
+    "nodemon": "^2.0.20",
     "prettier": "^2.7.1",
     "typescript": "^4.9.3"
   }
