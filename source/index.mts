@@ -69,6 +69,8 @@ await commander.program
     (async () => {
       while (true) {
         for (const url of application.configuration.urls) {
+          application.log("STARTING...", url);
+
           try {
             const response = await got(url);
             application.log("SUCCESS", url, String(response.statusCode));
@@ -95,7 +97,10 @@ await commander.program
               );
             }
           }
+
+          application.log("FINISHED", url);
         }
+
         await timers.setTimeout(
           5 * 60 * 1000 + Math.random() * 30 * 1000,
           undefined,
