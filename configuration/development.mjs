@@ -1,5 +1,9 @@
 export default {
-  urls: ["https://leafac.com", "https://non-existent.leafac.com"],
+  targets: [
+    { url: "https://leafac.com" },
+    { url: "https://non-existent.leafac.com" },
+  ],
+
   email: {
     options: {
       streamTransport: true,
@@ -10,5 +14,6 @@ export default {
       to: "Leandro Facchinetti <system-administrator@leafac.com>",
     },
   },
+
   interval: 10 * 1000,
 };

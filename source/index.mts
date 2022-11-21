@@ -3,6 +3,7 @@ import timers from "node:timers/promises";
 import url from "node:url";
 import * as commander from "commander";
 import { got } from "got";
+import * as GotTypes from "got";
 import nodemailer from "nodemailer";
 import { html } from "@leafac/html";
 
@@ -44,7 +45,7 @@ await commander.program
 
     const application: {
       configuration: {
-        urls: string[];
+        targets: GotTypes.OptionsOfUnknownResponseBody[];
         email: {
           options: any;
           defaults: nodemailer.SendMailOptions;
@@ -68,31 +69,43 @@ await commander.program
       application.configuration.email.defaults
     );
 
-    application.log("STARTING...", application.configuration.urls.join(", "));
+    application.log(
+      "STARTING...",
+      application.configuration.targets.join(", ")
+    );
 
-    const notifiedURLs = new Set<string>();
+    const notifiedURLs = new Set<GotTypes.OptionsOfUnknownResponseBody>();
 
     (async () => {
       while (true) {
-        for (const url of application.configuration.urls) {
-          application.log("STARTING...", url);
+        for (const target of application.configuration.targets) {
+          application.log("STARTING...", JSON.stringify(target));
 
           try {
-            const response = await got(url);
-            notifiedURLs.delete(url);
-            application.log("SUCCESS", url, String(response.statusCode));
+            const response = await got(target);
+            notifiedURLs.delete(target);
+            application.log(
+              "SUCCESS",
+              JSON.stringify(target),
+              String(response.statusCode)
+            );
           } catch (error: any) {
-            application.log("ERROR", url, String(error), error?.stack);
-            if (notifiedURLs.has(url))
+            application.log(
+              "ERROR",
+              JSON.stringify(target),
+              String(error),
+              error?.stack
+            );
+            if (notifiedURLs.has(target))
               application.log(
                 "SKIPPING SENDING ALERT BECAUSE PREVIOUS ERROR HASN’T BEEN RESOLVED YET...",
-                url
+                JSON.stringify(target)
               );
             else {
-              notifiedURLs.add(url);
+              notifiedURLs.add(target);
               try {
                 const sentMessageInfo = await sendMailTransport.sendMail({
-                  subject: `‘${url}’ IS DOWN`,
+                  subject: `‘${JSON.stringify(target)}’ IS DOWN`,
                   html: html`
                     <pre>
                     ${String(error)}
@@ -104,13 +117,13 @@ await commander.program
                 });
                 application.log(
                   "ALERT SENT",
-                  url,
+                  JSON.stringify(target),
                   sentMessageInfo.response ?? ""
                 );
               } catch (error: any) {
                 application.log(
                   "CATASTROPHIC ERROR TRYING TO SEND ALERT",
-                  url,
+                  JSON.stringify(target),
                   String(error),
                   error?.stack
                 );
@@ -118,7 +131,7 @@ await commander.program
             }
           }
 
-          application.log("FINISHED", url);
+          application.log("FINISHED", JSON.stringify(target));
         }
 
         await timers.setTimeout(application.configuration.interval, undefined, {
