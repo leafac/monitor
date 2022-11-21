@@ -105,7 +105,8 @@ await commander.program
             application.log(
               "SUCCESS",
               JSON.stringify(target),
-              JSON.stringify(response)
+              String(response.statusCode),
+              JSON.stringify(response.timings)
             );
           } catch (error: any) {
             application.log(
@@ -136,7 +137,7 @@ await commander.program
                 application.log(
                   "ALERT SENT",
                   JSON.stringify(target),
-                  JSON.stringify(sentMessageInfo ?? "")
+                  sentMessageInfo.response ?? ""
                 );
               } catch (error: any) {
                 application.log(
