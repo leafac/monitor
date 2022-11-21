@@ -3,7 +3,7 @@ import timers from "node:timers/promises";
 import url from "node:url";
 import * as commander from "commander";
 import { got } from "got";
-import * as GotTypes from "got";
+import * as Got from "got";
 import nodemailer from "nodemailer";
 import { html } from "@leafac/html";
 
@@ -45,12 +45,13 @@ await commander.program
 
     const application: {
       configuration: {
-        targets: GotTypes.OptionsOfUnknownResponseBody[];
+        targets: Got.OptionsOfUnknownResponseBody[];
         email: {
           options: any;
           defaults: nodemailer.SendMailOptions;
         };
         interval: number;
+        got?: Got.ExtendOptions;
       };
       log(...messageParts: string[]): void;
     } = {
@@ -64,6 +65,17 @@ await commander.program
     application.configuration.interval ??=
       5 * 60 * 1000 + Math.random() * 30 * 1000;
 
+    const gotClient = got.extend(
+      application.configuration.got ?? {
+        timeout: {
+          request: 5000,
+        },
+        retry: {
+          limit: 5,
+        },
+      }
+    );
+
     const sendMailTransport = nodemailer.createTransport(
       application.configuration.email.options,
       application.configuration.email.defaults
@@ -74,7 +86,7 @@ await commander.program
       application.configuration.targets.join(", ")
     );
 
-    const notifiedURLs = new Set<GotTypes.OptionsOfUnknownResponseBody>();
+    const notifiedURLs = new Set<Got.OptionsOfUnknownResponseBody>();
 
     (async () => {
       while (true) {
@@ -82,12 +94,12 @@ await commander.program
           application.log("STARTING...", JSON.stringify(target));
 
           try {
-            const response = await got(target);
+            const response = await gotClient(target);
             notifiedURLs.delete(target);
             application.log(
               "SUCCESS",
               JSON.stringify(target),
-              String(response.statusCode)
+              JSON.stringify(response)
             );
           } catch (error: any) {
             application.log(
