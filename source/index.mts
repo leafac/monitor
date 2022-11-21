@@ -64,6 +64,8 @@ await commander.program
       application.configuration.email.defaults
     );
 
+    application.log("STARTING...", application.configuration.urls.join(", "));
+
     (async () => {
       while (true) {
         for (const url of application.configuration.urls) {
@@ -103,6 +105,8 @@ await commander.program
     })();
 
     await stop;
+
+    application.log("FINISHED");
 
     await timers.setTimeout(10 * 1000, undefined, { ref: false });
     process.exit(1);
