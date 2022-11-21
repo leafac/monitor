@@ -97,7 +97,11 @@ await commander.program
             }
           }
         }
-        await timers.setTimeout(5 * 60 * 1000, undefined, { ref: false });
+        await timers.setTimeout(
+          5 * 60 * 1000 + Math.random() * 30 * 1000,
+          undefined,
+          { ref: false }
+        );
       }
     })();
 
