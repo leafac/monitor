@@ -66,6 +66,8 @@ await commander.program
 
     application.log("STARTING...", application.configuration.urls.join(", "));
 
+    const notifiedURLs = new Set<string>();
+
     (async () => {
       while (true) {
         for (const url of application.configuration.urls) {
@@ -73,28 +75,42 @@ await commander.program
 
           try {
             const response = await got(url);
+            notifiedURLs.delete(url);
             application.log("SUCCESS", url, String(response.statusCode));
           } catch (error: any) {
             application.log("ERROR", url, String(error), error?.stack);
-            try {
-              await sendMailTransport.sendMail({
-                subject: `‘${url}’ IS DOWN`,
-                html: html`
-                  <pre>
+            if (notifiedURLs.has(url))
+              application.log(
+                "SKIPPING SENDING ALERT BECAUSE PREVIOUS ERROR HASN’T BEEN RESOLVED YET...",
+                url
+              );
+            else {
+              notifiedURLs.add(url);
+              try {
+                const sentMessageInfo = await sendMailTransport.sendMail({
+                  subject: `‘${url}’ IS DOWN`,
+                  html: html`
+                    <pre>
                     ${String(error)}
 
                     ${error?.stack}
                   </pre
-                  >
-                `,
-              });
-            } catch (error: any) {
-              application.log(
-                "CATASTROPHIC ERROR TRYING TO SEND ALERT",
-                url,
-                String(error),
-                error?.stack
-              );
+                    >
+                  `,
+                });
+                application.log(
+                  "ALERT SENT",
+                  url,
+                  sentMessageInfo.response ?? ""
+                );
+              } catch (error: any) {
+                application.log(
+                  "CATASTROPHIC ERROR TRYING TO SEND ALERT",
+                  url,
+                  String(error),
+                  error?.stack
+                );
+              }
             }
           }
 
