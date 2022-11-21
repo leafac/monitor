@@ -1,0 +1,50 @@
+{
+  "name": "@leafac/css",
+  "version": "0.7.0",
+  "description": "Radically Straightforward CSS",
+  "keywords": [
+    "css",
+    "postcss",
+    "css nesting",
+    "css preprocessor",
+    "tagged template literal",
+    "template strings"
+  ],
+  "homepage": "https://github.com/leafac/css",
+  "repository": "https://github.com/leafac/css",
+  "bugs": "https://github.com/leafac/css/issues",
+  "funding": [
+    "https://patreon.com/leafac",
+    "https://paypal.me/LeandroFacchinettiEU",
+    "https://github.com/sponsors/leafac",
+    "https://btc.com/34KJBgtaFYMtDqpSgMayw9qiKWg2GQXA9M"
+  ],
+  "author": "Leandro Facchinetti <css@leafac.com> (https://leafac.com)",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "exports": {
+    ".": "./build/index.mjs",
+    "./build/browser.css": "./build/browser.css"
+  },
+  "types": "./build/index.d.mts",
+  "scripts": {
+    "prepare": "tsc && cross-env PREPARE=leafac--css node ./build/index.mjs",
+    "test": "prettier --check \"source/**/*.mts\" --end-of-line auto && npm run prepare && cross-env TEST=leafac--css node ./build/index.mjs"
+  },
+  "dependencies": {
+    "@emotion/hash": "^0.9.0",
+    "@leafac/html": "^3.0.2",
+    "autoprefixer": "^10.4.12",
+    "postcss": "^8.4.18",
+    "postcss-nested": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.11.0",
+    "@types/prettier": "^2.7.1",
+    "cross-env": "^7.0.3",
+    "prettier": "^2.7.1",
+    "typescript": "^4.8.4"
+  }
+}
