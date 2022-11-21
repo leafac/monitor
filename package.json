@@ -1,36 +1,30 @@
 {
-  "name": "@leafac/css",
+  "name": "@leafac/monitor",
   "version": "0.7.0",
-  "description": "Radically Straightforward CSS",
+  "description": "Radically Straightforward Monitoring",
   "keywords": [
-    "css",
-    "postcss",
-    "css nesting",
-    "css preprocessor",
-    "tagged template literal",
-    "template strings"
+    "monitoring",
+    "supervisor",
+    "ping",
+    "uptime"
   ],
-  "homepage": "https://github.com/leafac/css",
-  "repository": "https://github.com/leafac/css",
-  "bugs": "https://github.com/leafac/css/issues",
+  "homepage": "https://github.com/leafac/monitor",
+  "repository": "https://github.com/leafac/monitor",
+  "bugs": "https://github.com/leafac/monitor/issues",
   "funding": [
     "https://patreon.com/leafac",
     "https://paypal.me/LeandroFacchinettiEU",
     "https://github.com/sponsors/leafac",
     "https://btc.com/34KJBgtaFYMtDqpSgMayw9qiKWg2GQXA9M"
   ],
-  "author": "Leandro Facchinetti <css@leafac.com> (https://leafac.com)",
+  "author": "Leandro Facchinetti <monitor@leafac.com> (https://leafac.com)",
   "license": "MIT",
   "publishConfig": {
     "access": "public"
   },
-  "exports": {
-    ".": "./build/index.mjs",
-    "./build/browser.css": "./build/browser.css"
-  },
-  "types": "./build/index.d.mts",
+  "bin": "./build/index.mjs",
   "scripts": {
-    "prepare": "tsc && cross-env PREPARE=leafac--css node ./build/index.mjs",
+    "prepare": "tsc",
     "test": "prettier --check \"source/**/*.mts\" --end-of-line auto && npm run prepare && cross-env TEST=leafac--css node ./build/index.mjs"
   },
   "dependencies": {
