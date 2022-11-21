@@ -1,9 +1,9 @@
 [Unit]
-Description=Courselore
+Description=Monitor
 After=network.target
 
 [Service]
-ExecStart=/root/courselore/courselore /root/courselore/configuration.mjs
+ExecStart=/root/monitor/monitor /root/monitor/configuration.mjs
 User=root
 Restart=always
 
