@@ -25,6 +25,7 @@
   "bin": "./build/index.mjs",
   "scripts": {
     "prepare": "tsc",
+    "start": "npm run prepare && node ./build/index.mjs ./configuration/development.mjs",
     "test": "prettier --check \"source/**/*.mts\" --end-of-line auto"
   },
   "dependencies": {
