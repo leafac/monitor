@@ -28,7 +28,9 @@
     "test": "prettier --check \"source/**/*.mts\" --end-of-line auto"
   },
   "dependencies": {
+    "@leafac/html": "^3.0.3",
     "@types/nodemailer": "^6.4.6",
+    "commander": "^9.4.1",
     "got": "^12.5.3",
     "nodemailer": "^6.8.0"
   },
