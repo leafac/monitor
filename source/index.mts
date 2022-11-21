@@ -64,6 +64,11 @@ await commander.program
       },
     };
 
+    const sendMailTransport = nodemailer.createTransport(
+      application.configuration.email.options,
+      application.configuration.email.defaults
+    );
+
     application.configuration.interval ??=
       5 * 60 * 1000 + Math.random() * 30 * 1000;
 
@@ -78,19 +83,16 @@ await commander.program
       }
     );
 
-    const sendMailTransport = nodemailer.createTransport(
-      application.configuration.email.options,
-      application.configuration.email.defaults
-    );
-
     application.log(
       "MONITOR",
       application.version,
       "STARTING...",
-      application.configuration.targets.join(", ")
+      JSON.stringify(application.configuration.targets)
     );
 
-    const notifiedURLs = new Set<Got.OptionsOfUnknownResponseBody>();
+    const notifiedTargets = new Set<
+      typeof application["configuration"]["targets"][number]
+    >();
 
     (async () => {
       while (true) {
@@ -99,7 +101,7 @@ await commander.program
 
           try {
             const response = await gotClient(target);
-            notifiedURLs.delete(target);
+            notifiedTargets.delete(target);
             application.log(
               "SUCCESS",
               JSON.stringify(target),
@@ -112,22 +114,22 @@ await commander.program
               String(error),
               error?.stack
             );
-            if (notifiedURLs.has(target))
+            if (notifiedTargets.has(target))
               application.log(
                 "SKIPPING SENDING ALERT BECAUSE PREVIOUS ERROR HASN’T BEEN RESOLVED YET...",
                 JSON.stringify(target)
               );
             else {
-              notifiedURLs.add(target);
+              notifiedTargets.add(target);
               try {
                 const sentMessageInfo = await sendMailTransport.sendMail({
                   subject: `‘${JSON.stringify(target)}’ IS DOWN`,
                   html: html`
                     <pre>
-                    ${String(error)}
+                      ${String(error)}
 
-                    ${error?.stack}
-                  </pre
+                      ${error?.stack}
+                    </pre
                     >
                   `,
                 });
