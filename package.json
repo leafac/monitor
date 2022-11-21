@@ -1,6 +1,6 @@
 {
   "name": "@leafac/monitor",
-  "version": "0.7.0",
+  "version": "0.0.0",
   "description": "Radically Straightforward Monitoring",
   "keywords": [
     "monitoring",
@@ -25,18 +25,16 @@
   "bin": "./build/index.mjs",
   "scripts": {
     "prepare": "tsc",
-    "test": "prettier --check \"source/**/*.mts\" --end-of-line auto && npm run prepare && cross-env TEST=leafac--css node ./build/index.mjs"
+    "test": "prettier --check \"source/**/*.mts\" --end-of-line auto"
   },
   "dependencies": {
-    "@emotion/hash": "^0.9.0",
-    "@leafac/html": "^3.0.2",
-    "autoprefixer": "^10.4.12",
-    "postcss": "^8.4.18",
-    "postcss-nested": "^6.0.0"
+    "@types/nodemailer": "^6.4.6",
+    "got": "^12.5.3",
+    "nodemailer": "^6.8.0"
   },
   "devDependencies": {
     "@types/node": "^18.11.0",
-    "@types/prettier": "^2.7.1",
+    "caxa": "^3.0.1",
     "cross-env": "^7.0.3",
     "prettier": "^2.7.1",
     "typescript": "^4.8.4"
