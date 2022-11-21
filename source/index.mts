@@ -49,6 +49,7 @@ await commander.program
           options: any;
           defaults: nodemailer.SendMailOptions;
         };
+        interval: number;
       };
       log(...messageParts: string[]): void;
     } = {
@@ -58,6 +59,9 @@ await commander.program
         console.log([new Date().toISOString(), ...messageParts].join(" \t"));
       },
     };
+
+    application.configuration.interval ??=
+      5 * 60 * 1000 + Math.random() * 30 * 1000;
 
     const sendMailTransport = nodemailer.createTransport(
       application.configuration.email.options,
@@ -117,11 +121,9 @@ await commander.program
           application.log("FINISHED", url);
         }
 
-        await timers.setTimeout(
-          5 * 60 * 1000 + Math.random() * 30 * 1000,
-          undefined,
-          { ref: false }
-        );
+        await timers.setTimeout(application.configuration.interval, undefined, {
+          ref: false,
+        });
       }
     })();
 

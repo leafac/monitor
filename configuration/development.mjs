@@ -10,4 +10,5 @@ export default {
       to: "Leandro Facchinetti <system-administrator@leafac.com>",
     },
   },
+  interval: 10 * 1000,
 };
