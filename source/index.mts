@@ -44,6 +44,7 @@ await commander.program
     });
 
     const application: {
+      version: string;
       configuration: {
         targets: Got.OptionsOfUnknownResponseBody[];
         email: {
@@ -55,6 +56,7 @@ await commander.program
       };
       log(...messageParts: string[]): void;
     } = {
+      version,
       configuration: (await import(url.pathToFileURL(configuration).href))
         .default,
       log(...messageParts) {
@@ -82,6 +84,8 @@ await commander.program
     );
 
     application.log(
+      "MONITOR",
+      application.version,
       "STARTING...",
       application.configuration.targets.join(", ")
     );
@@ -130,7 +134,7 @@ await commander.program
                 application.log(
                   "ALERT SENT",
                   JSON.stringify(target),
-                  sentMessageInfo.response ?? ""
+                  JSON.stringify(sentMessageInfo ?? "")
                 );
               } catch (error: any) {
                 application.log(
