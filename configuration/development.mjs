@@ -1,5 +1,5 @@
 export default {
-  urls: ["https://leafac.com"],
+  urls: ["https://leafac.com", "https://non-existent.leafac.com"],
   email: {
     options: {
       streamTransport: true,
