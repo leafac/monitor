@@ -69,8 +69,7 @@ await commander.program
       application.configuration.email.defaults
     );
 
-    application.configuration.interval ??=
-      5 * 60 * 1000 + Math.random() * 30 * 1000;
+    application.configuration.interval ??= 5 * 60 * 1000;
 
     const gotClient = got.extend(
       application.configuration.got ?? {
