@@ -159,7 +159,9 @@ ${error?.stack}
 
     await stop;
 
-    application.log("FINISHED");
+    process.once("exit", () => {
+      application.log("STOPPED");
+    });
 
     await timers.setTimeout(10 * 1000, undefined, { ref: false });
     process.exit(1);
