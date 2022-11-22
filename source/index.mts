@@ -74,7 +74,7 @@ await commander.program
     const gotClient = got.extend(
       application.configuration.got ?? {
         timeout: {
-          request: 5000,
+          request: 5 * 1000,
         },
         retry: {
           limit: 5,
