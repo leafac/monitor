@@ -121,19 +121,18 @@ await commander.program
                 JSON.stringify(target)
               );
             else {
-              notifiedTargets.add(target);
               try {
                 const sentMessageInfo = await sendMailTransport.sendMail({
-                  subject: `‘${JSON.stringify(target)}’ IS DOWN`,
+                  subject: `⚠️ ‘${JSON.stringify(target)}’ IS DOWN`,
                   html: html`
                     <pre>
-                      ${String(error)}
+${String(error)}
 
-                      ${error?.stack}
-                    </pre
-                    >
+${error?.stack}
+</pre>
                   `,
                 });
+                notifiedTargets.add(target);
                 application.log(
                   "ALERT SENT",
                   JSON.stringify(target),
