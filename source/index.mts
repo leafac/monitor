@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import fs from "node:fs/promises";
 import timers from "node:timers/promises";
 import url from "node:url";
