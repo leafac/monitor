@@ -1,6 +1,6 @@
 on: push
 jobs:
-  web--build:
+  build:
     strategy:
       matrix:
         os: [windows, macos, ubuntu]
@@ -23,7 +23,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 19
       - run: |
           cd web
           npm ci
@@ -34,7 +34,7 @@ jobs:
           name: ${{ matrix.artifact }}
           path: web/${{ matrix.artifact }}
 
-  web--test:
+  test:
     strategy:
       matrix:
         os: [windows, macos, ubuntu]
@@ -43,86 +43,20 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 19
       - run: |
           cd web
           npm install-ci-test
 
-  web--deploy--try-courselore-org:
-    if: github.ref == 'refs/heads/main'
-    needs: [web--build, web--test]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: webfactory/ssh-agent@v0.7.0
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-      - run: |
-          cat >> ~/.ssh/known_hosts << "EOF"
-          try.courselore.org ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGyaP0e+129/zgwhuavd/GAiZVYxgc8oncfWBW+wlcdO
-          try.courselore.org ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDGAWFdx5CGspfwddSeorz1agEafveZq0w9F/JPoGm5fIryqlqtcuTYcKdlntaks4oHy2J5riTE4eJ8Nft2kVHOuJFU5I/Zrv84XHgH/OAB8MlyHlSBxWj3ICN1tREX92QMAOSqq4hz5LVGEYzc8YFnTLG1eIqpgtNzQXvsRdfFlsYsGuxQqatQ0agCmPY97GhDOxBGC/n1XgB+qyJC1GPsn8GjpvXqfhoCiI+z0FiznK6HSRN+DCFl/kJdJHZ9j+IJPctujGpPx5EhUWbNz9LsXa4pftMDxWsu4mLIbA9dUERic06Ou2hdLh5DkaOJ/rssvPIH8U9Ek+c+dx6gcqL9dRDhJs0t6CdOSuuO0g072ipLdbVzqpbjalrgNt9N0fmVAKpSAj9XmykaEEeUiYAS3ppFnGgzK4HZ3VG1nevnJs04xwTtk29c1ZAuAP6nMakVuBDvttSb1lMFN03TG3u/heY7eyKvOX4Uc+Z8hXtq4FuWa5V4j6bUTL58anp8cVE=
-          try.courselore.org ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBG/EwPAIUK55YtP/2/uvuUMsgdzVXWNij6xUIp420M+27iszaAGsnIf8kW2AafjSgmhPSIdw0eaF9hEV17K61KM=
-          EOF
-      - uses: actions/checkout@v3
-      - uses: actions/download-artifact@v3
-        with:
-          name: courselore--linux--${{ github.sha }}.tgz
-      - run: |
-          tar xzf courselore--linux--${{ github.sha }}.tgz
-
-          ssh root@try.courselore.org "mkdir -p courselore"
-          rsync -a courselore root@try.courselore.org:courselore/courselore
-          rsync -a web/configuration/try.courselore.org.mjs root@try.courselore.org:courselore/configuration.mjs
-          rsync -a web/configuration/courselore.service root@try.courselore.org:/etc/systemd/system/courselore.service
-
-          ssh root@try.courselore.org << "EOF"
-          systemctl stop courselore
-          mv courselore/data/ courselore/data--$(date +"%Y-%m-%d--%H-%M-%S")/ || true
-          systemctl daemon-reload
-          systemctl restart courselore
-          systemctl enable courselore
-          EOF
-
-  web--deploy--courselore-org:
+  publish--npm:
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: [web--build, web--test]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: webfactory/ssh-agent@v0.7.0
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-      - run: |
-          cat >> ~/.ssh/known_hosts << "EOF"
-          courselore.org ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDGK4FruddouTHc4en3JweGtdSBvy7vHERXc2GeDSiZiOyXEQ6DLHZDCiUpIYB3VGDDAC9QsL/drvdpIYFOgmbBwMlU0nEj8rEHs8HH614JH3reXLPzCEQqh1fiePo/+pfBVFKwNfZS90fKyWwXt9Jgayl3EtupK4qZsL3ZKFk1I3ashUfYRGK0/q8FDogn1Kfw8PVAbJEcadCvPwtBNCQM99qmwmdv3hkOJV+EFOSvVPx9uINmyMrRyLFxObgJfe6GALjb5smkuKSGqOIY/T8gNgz02wpYEUYJCM8NviDXn9xPaSSInfR1Aki+CKUdm5InkmYaeywkUys7nwuyMcwP7eNdiAnim9NvRuD4tRAclWLKUAvxHLDV0x3nVc7unrUIDE9lN5Z0DPS9CkBDs4dtMG+bk2auXgX2rR/uusB/65HHcLT0h/levtTopn0UfHrZxABfLXei08vrns2MnNn/bVUm8mrNJFCmurTWKc6mAFJFjSQ4PYacNuam28uStmE=
-          courselore.org ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBHfmR6Uk3d9aPn44tL+o5finOSDqss+u9X66e8tvXYuU0SNNh1xYjed7pnfE+g5nq2AWXSYUKzz8IE1oCsNcTK4=
-          courselore.org ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPofde8yo79U6RYTB5DRK2qy1KDwrJRFb1A2FwqEJFsm
-          EOF
-      - uses: actions/checkout@v3
-      - uses: actions/download-artifact@v3
-        with:
-          name: courselore--linux--${{ github.sha }}.tgz
-      - run: |
-          tar xzf courselore--linux--${{ github.sha }}.tgz
-
-          ssh root@courselore.org "mkdir -p courselore"
-          rsync -a courselore root@courselore.org:courselore/courselore
-          rsync -a web/configuration/courselore.org.mjs root@courselore.org:courselore/configuration.mjs
-          rsync -a web/configuration/courselore.service root@courselore.org:/etc/systemd/system/courselore.service
-
-          ssh root@courselore.org << "EOF"
-          systemctl daemon-reload
-          systemctl restart courselore
-          systemctl enable courselore
-          EOF
-
-  web--publish--npm:
-    if: startsWith(github.ref, 'refs/tags/v')
-    needs: web--test
+    needs: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 19
           registry-url: https://registry.npmjs.org/
       - run: |
           cd web
@@ -131,9 +65,9 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-  web--publish--release:
+  publish--release:
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: [web--build, web--test]
+    needs: [build, test]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v3
