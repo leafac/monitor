@@ -52,7 +52,7 @@ await commander.program
           defaults: nodemailer.SendMailOptions;
         };
         interval: number;
-        got?: Got.ExtendOptions;
+        got: Got.ExtendOptions;
       };
       log(...messageParts: string[]): void;
     } = {
