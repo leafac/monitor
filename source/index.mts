@@ -7,7 +7,7 @@ import * as commander from "commander";
 import { got } from "got";
 import * as Got from "got";
 import nodemailer from "nodemailer";
-import { html } from "@leafac/html";
+import html from "@leafac/html";
 
 const version = JSON.parse(
   await fs.readFile(new URL("../package.json", import.meta.url), "utf8")
