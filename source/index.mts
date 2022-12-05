@@ -48,11 +48,13 @@ await commander.program
     const application: {
       version: string;
       configuration: {
-        targets: Got.OptionsOfUnknownResponseBody[];
-        email: {
-          options: any;
-          defaults: nodemailer.SendMailOptions;
-        };
+        monitors: {
+          target: Got.OptionsOfUnknownResponseBody;
+          email: {
+            options: any;
+            defaults: nodemailer.SendMailOptions;
+          };
+        }[];
         interval: number;
         got: Got.ExtendOptions;
       };
@@ -65,11 +67,6 @@ await commander.program
         console.log([new Date().toISOString(), ...messageParts].join(" \t"));
       },
     };
-
-    const sendMailTransport = nodemailer.createTransport(
-      application.configuration.email.options,
-      application.configuration.email.defaults
-    );
 
     application.configuration.interval ??= 5 * 60 * 1000;
 
@@ -88,61 +85,68 @@ await commander.program
       "MONITOR",
       application.version,
       "STARTING...",
-      JSON.stringify(application.configuration.targets)
+      JSON.stringify(
+        application.configuration.monitors.map((monitor) => monitor.target)
+      )
     );
 
-    const notifiedTargets = new Set<
-      typeof application["configuration"]["targets"][number]
+    const notifiedMonitors = new Set<
+      typeof application["configuration"]["monitors"][number]
     >();
 
     (async () => {
       while (true) {
-        for (const target of application.configuration.targets) {
-          application.log("STARTING...", JSON.stringify(target));
+        for (const monitor of application.configuration.monitors) {
+          application.log("STARTING...", JSON.stringify(monitor.target));
 
           try {
-            const response = await gotClient(target);
-            notifiedTargets.delete(target);
+            const response = await gotClient(monitor.target);
+            notifiedMonitors.delete(monitor);
             application.log(
               "SUCCESS",
-              JSON.stringify(target),
+              JSON.stringify(monitor.target),
               String(response.statusCode),
               JSON.stringify(response.timings)
             );
           } catch (error: any) {
             application.log(
               "ERROR",
-              JSON.stringify(target),
+              JSON.stringify(monitor.target),
               String(error),
               error?.stack
             );
-            if (notifiedTargets.has(target))
+            if (notifiedMonitors.has(monitor))
               application.log(
                 "SKIPPING SENDING ALERT BECAUSE PREVIOUS ERROR HASN’T BEEN RESOLVED YET...",
-                JSON.stringify(target)
+                JSON.stringify(monitor.target)
               );
             else {
               try {
-                const sentMessageInfo = await sendMailTransport.sendMail({
-                  subject: `⚠️ ‘${JSON.stringify(target)}’ IS DOWN`,
-                  html: html`
-                    <pre>
+                const sentMessageInfo = await nodemailer
+                  .createTransport(
+                    monitor.email.options,
+                    monitor.email.defaults
+                  )
+                  .sendMail({
+                    subject: `⚠️ ‘${JSON.stringify(monitor.target)}’ IS DOWN`,
+                    html: html`
+                      <pre>
 ${String(error)}
 
 ${error?.stack}
 </pre>
-                  `,
-                });
-                notifiedTargets.add(target);
+                    `,
+                  });
+                notifiedMonitors.add(monitor);
                 application.log(
                   "ALERT SENT",
-                  JSON.stringify(target),
+                  JSON.stringify(monitor.target),
                   sentMessageInfo.response ?? ""
                 );
               } catch (error: any) {
                 application.log(
                   "CATASTROPHIC ERROR TRYING TO SEND ALERT",
-                  JSON.stringify(target),
+                  JSON.stringify(monitor.target),
                   String(error),
                   error?.stack
                 );
@@ -150,7 +154,7 @@ ${error?.stack}
             }
           }
 
-          application.log("FINISHED", JSON.stringify(target));
+          application.log("FINISHED", JSON.stringify(monitor.target));
         }
 
         await timers.setTimeout(application.configuration.interval, undefined, {
