@@ -7,6 +7,7 @@ import * as commander from "commander";
 import { got } from "got";
 import * as Got from "got";
 import nodemailer from "nodemailer";
+import * as node from "@leafac/node";
 import html from "@leafac/html";
 
 const version = JSON.parse(
@@ -21,30 +22,6 @@ await commander.program
   .allowExcessArguments(false)
   .showHelpAfterError()
   .action(async (configuration: string) => {
-    const stop = new Promise<void>((resolve) => {
-      const processKeepAlive = new AbortController();
-      timers
-        .setInterval(1 << 30, undefined, {
-          signal: processKeepAlive.signal,
-        })
-        [Symbol.asyncIterator]()
-        .next()
-        .catch(() => {});
-      for (const event of [
-        "exit",
-        "SIGHUP",
-        "SIGINT",
-        "SIGQUIT",
-        "SIGTERM",
-        "SIGUSR2",
-        "SIGBREAK",
-      ])
-        process.on(event, () => {
-          processKeepAlive.abort();
-          resolve();
-        });
-    });
-
     const application: {
       version: string;
       configuration: {
@@ -163,7 +140,7 @@ ${error?.stack}
       }
     })();
 
-    await stop;
+    await node.eventLoopActive();
 
     process.once("exit", () => {
       application.log("STOPPED");

@@ -30,6 +30,7 @@
   },
   "dependencies": {
     "@leafac/html": "^4.0.0",
+    "@leafac/node": "^0.0.1",
     "commander": "^9.4.1",
     "got": "^12.5.3",
     "nodemailer": "^6.8.0"
